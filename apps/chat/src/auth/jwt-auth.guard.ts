@@ -8,10 +8,11 @@ import { ErrorStatus } from 'src/common/responses/exceptions/errorStatus';
 export class JWTAuthGuard extends AuthGuard('jwt') {
   getRequest(context: ExecutionContext) {
     const client = context.switchToWs().getClient<Socket>();
+    const authorization = client.handshake.auth.accessToken || client.handshake.headers.accesstoken;
 
     return {
       headers: {
-        authorization: client.handshake.auth.accessToken,
+        authorization,
       },
     };
   }

@@ -1,0 +1,1 @@
+export { useConsume } from './useConsume';

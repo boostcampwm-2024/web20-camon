@@ -1,35 +1,45 @@
 {
   "parser": "@typescript-eslint/parser",
+
   "parserOptions": {
-    "project": ["./apps/client/tsconfig.json"],
+    "project": ["./tsconfig.json"],
     "ecmaVersion": 12,
     "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
     }
   },
+
   "env": {
     "browser": true,
     "es2021": true
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
-  ],
+
+  "extends": ["airbnb", "airbnb/hooks", "plugin:@typescript-eslint/recommended", "prettier"],
+
   "settings": {
     "react": {
       "version": "detect"
     }
   },
+
   "plugins": ["prettier"],
+
   "rules": {
+    // React 관련 규칙
     "react/react-in-jsx-scope": "off",
     "react/no-unescaped-entities": "off",
     "react/prop-types": "off",
-    "react-hooks/exhaustive-deps": "warn",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    ],
+    "react/require-default-props": "off",
+    "react/jsx-props-no-spreading": "off",
+
+    // TypeScript 관련 규칙
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -37,6 +47,23 @@
         "argsIgnorePattern": "^_", // _ 로 시작하는 변수는 무시
         "varsIgnorePattern": "^_", // _ 로 시작하는 변수는 무시
         "ignoreRestSiblings": true
+      }
+    ],
+
+    // Import/Export 관련 규칙
+    "import/no-unresolved": "off",
+    "import/extensions": ["off"],
+    "import/prefer-default-export": "off",
+    "no-restricted-exports": "warn",
+
+    // 접근성 관련 규칙
+    "jsx-a11y/media-has-caption": "off",
+
+    // 기타 규칙
+    "no-param-reassign": [
+      "warn",
+      {
+        "props": false
       }
     ]
   }
