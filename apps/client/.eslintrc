@@ -3,6 +3,7 @@
 
   "parserOptions": {
     "project": ["./tsconfig.json"],
+    "tsconfigRootDir": "./apps/client",
     "ecmaVersion": 12,
     "sourceType": "module",
     "ecmaFeatures": {
