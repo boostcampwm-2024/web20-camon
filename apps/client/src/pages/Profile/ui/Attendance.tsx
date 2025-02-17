@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ErrorCharacter, LoadingCharacter } from '@/shared/ui';
 import { PlayIcon } from '@/shared/ui/Icons';
 import { axiosInstance } from '@/shared/api';
@@ -12,43 +12,42 @@ type AttendanceData = {
   isAttendance: boolean;
 };
 
-export function Attendance() {
-  const [attendanceList, setAttendanceList] = useState<AttendanceData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showLoading, setShowLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+type AttendanceResponse = {
+  success: boolean;
+  status: string;
+  message: string;
+  data: {
+    memberId: number;
+    attendances: AttendanceData[];
+  };
+};
 
+const fetchAttendance = async (): Promise<AttendanceData[]> => {
+  const { data } = await axiosInstance.get<AttendanceResponse>('/v1/members/attendance');
+  if (!data.success) {
+    throw new Error(data.message || '출석부 조회에 실패했습니다.');
+  }
+  return data.data.attendances;
+};
+
+export function Attendance() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    axiosInstance
-      .get('/v1/members/attendance')
-      .then(response => {
-        if (response.data.success) {
-          setAttendanceList(response.data.data.attendances);
-        } else {
-          setError(new Error(response.data.message));
-        }
-      })
-      .catch(err => setError(err instanceof Error ? err : new Error(err)))
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [setAttendanceList, setError]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoading(true);
-    }, 250);
-
-    return () => clearTimeout(timer);
+  const {
+    data: attendanceList,
+    error,
+    isLoading,
+  } = useQuery<AttendanceData[], Error>({
+    queryKey: ['attendance'],
+    queryFn: fetchAttendance,
+    staleTime: 1000 * 60,
   });
 
   const handlePlayRecord = (attendanceId: number) => {
     navigate(`/record/${attendanceId}`);
   };
 
-  if (showLoading && isLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <LoadingCharacter size={200} />
