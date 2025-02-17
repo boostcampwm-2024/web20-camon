@@ -1,47 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { ErrorCharacter, LoadingCharacter } from '@/shared/ui';
 import { PlayIcon } from '@/shared/ui/Icons';
-import { axiosInstance } from '@/shared/api';
+import { useAttendanceList } from '@/entities/attendance';
 
-type AttendanceData = {
-  attendanceId: number;
-  date: string;
-  startTime: string;
-  endTime: string;
-  isAttendance: boolean;
-};
-
-type AttendanceResponse = {
-  success: boolean;
-  status: string;
-  message: string;
-  data: {
-    memberId: number;
-    attendances: AttendanceData[];
-  };
-};
-
-const fetchAttendance = async (): Promise<AttendanceData[]> => {
-  const { data } = await axiosInstance.get<AttendanceResponse>('/v1/members/attendance');
-  if (!data.success) {
-    throw new Error(data.message || '출석부 조회에 실패했습니다.');
-  }
-  return data.data.attendances;
-};
+const ATTENDANCE_TABLE_HEADER = ['학습일', '시작 시간', '종료 시간', '출석 여부'];
 
 export function Attendance() {
+  const { attendanceList, error, isLoading } = useAttendanceList();
   const navigate = useNavigate();
-
-  const {
-    data: attendanceList,
-    error,
-    isLoading,
-  } = useQuery<AttendanceData[], Error>({
-    queryKey: ['attendance'],
-    queryFn: fetchAttendance,
-    staleTime: 1000 * 60,
-  });
 
   const handlePlayRecord = (attendanceId: number) => {
     navigate(`/record/${attendanceId}`);
@@ -67,7 +33,7 @@ export function Attendance() {
     <div className="flex justify-center h-1/2 w-full">
       <div className="flex flex-col h-full w-[80vw] border border-border-bold border-b-transparent rounded-t">
         <div className="flex flex-row justify-around items-center gap-11 bg-surface-alt w-full h-14 rounded-t">
-          {['학습일', '시작 시간', '종료 시간', '출석 여부'].map((data: string) => (
+          {ATTENDANCE_TABLE_HEADER.map((data: string) => (
             <div key={data} className="flex flex-1 justify-center items-center text-display-bold24 text-text-bold">
               {data}
             </div>
