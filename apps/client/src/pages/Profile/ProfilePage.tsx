@@ -1,23 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Attendance, UserInfo } from './ui';
-import { UserData } from './model';
 import { EditUserInfo } from '@/features/editProfile';
-import { axiosInstance } from '@/shared/api';
 import { ErrorCharacter, LoadingCharacter } from '@/shared/ui';
-
-const getUserInfo = async (): Promise<UserData> => {
-  const response = await axiosInstance.get('/v1/members/info');
-  if (!response.data.success) {
-    throw new Error(response.data.message);
-  }
-  return response.data.data;
-};
+import { useUserData } from '@/entities/user';
 
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
 
-  const { data: userData, isLoading, error } = useQuery({ queryKey: ['userData'], queryFn: getUserInfo });
+  const { userData, isLoading, error } = useUserData();
 
   useEffect(() => {
     if (!userData) return;

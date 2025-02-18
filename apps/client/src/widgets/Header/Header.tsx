@@ -1,20 +1,20 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/shadcn/avatar';
 import { cn } from '@/shared/lib';
 import { AuthContext, useAuth } from '@/features/auth';
-import { axiosInstance } from '@/shared/api';
 import { Button } from '@/shared/ui/shadcn/button';
 import { LogoButton } from './LogoButton';
 import { LogInButton } from './LogInButton';
+import { useProfileImage } from '@/entities/user/model/queries';
 
 export function Header() {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
-  const [profileImgUrl, setProfileImgUrl] = useState('');
   const broadcastRef = useRef<Window | null>(null);
   const { isLoggedIn } = useContext(AuthContext);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { profileImgUrl } = useProfileImage(isLoggedIn);
 
   const handleCheckInClick = () => {
     if (broadcastRef.current && !broadcastRef.current.closed) {
@@ -53,14 +53,6 @@ export function Header() {
     logout();
     navigate('/');
   };
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    axiosInstance.get('/v1/members/profile-image').then(response => {
-      if (!response.data.success) return;
-      setProfileImgUrl(response.data.data.profileImage);
-    });
-  }, [isLoggedIn]);
 
   return (
     <header className="fixed top-0 left-0 h-fit w-full px-10 py-3 flex justify-between z-10 bg-surface-default">
