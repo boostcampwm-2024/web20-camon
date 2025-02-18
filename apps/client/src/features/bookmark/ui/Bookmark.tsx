@@ -1,16 +1,14 @@
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Modal, CloseIcon } from '@/shared/ui';
 import { Button } from '@/shared/ui/shadcn/button';
-import { useToast } from '@/shared/lib';
 import { AuthContext } from '@/shared/contexts';
-import { axiosInstance } from '@/shared/api';
-import { BookmarkData } from '@/features/bookmark';
+import { BookmarkData, getBookmarks, useBookmarkMutation } from '@/features/bookmark';
 
 export function Bookmark() {
   const { isLoggedIn } = useContext(AuthContext);
-  const [bookmarkList, setBookmarkList] = useState<BookmarkData[]>([]);
   const [showModal, setShowModal] = useState(false);
   const {
     register,
@@ -18,7 +16,20 @@ export function Bookmark() {
     formState: { errors },
     reset,
   } = useForm<BookmarkData>();
-  const { toast } = useToast();
+
+  const { data: bookmarkList = [] } = useQuery<BookmarkData[]>({
+    queryKey: ['bookmarks'],
+    queryFn: getBookmarks,
+    enabled: isLoggedIn,
+    staleTime: 1000 * 50 * 5,
+  });
+
+  const { mutateAdd, mutateDelete } = useBookmarkMutation({
+    onAddSuccess: () => {
+      reset();
+      setShowModal(false);
+    },
+  });
 
   const handleClickBookmarkButton = (url: string) => {
     window.open(url);
@@ -26,46 +37,14 @@ export function Bookmark() {
 
   const handleAddBookmark = (newBookmark: BookmarkData) => {
     if (!isLoggedIn) return;
-    axiosInstance
-      .post('/v1/bookmarks', newBookmark)
-      .then(response => {
-        if (response.data.success) {
-          const addedBookmark = { ...newBookmark, bookmarkId: response.data.data.bookmarkId };
-          const newBookmarkList = [...bookmarkList, addedBookmark];
-          setBookmarkList(newBookmarkList);
-        } else {
-          toast({ variant: 'destructive', title: '북마크 생성 실패' });
-        }
-      })
-      .finally(() => {
-        reset();
-        setShowModal(false);
-      });
+    mutateAdd(newBookmark);
   };
 
   const handleDeleteBookmark = (e: React.MouseEvent, bookmarkId: number) => {
     e.stopPropagation();
-
     if (!isLoggedIn) return;
-    axiosInstance.delete(`/v1/bookmarks/${bookmarkId}`).then(response => {
-      if (response.data.success) {
-        const newBookmarkList = bookmarkList.filter((data, _) => data.bookmarkId !== bookmarkId);
-        setBookmarkList(newBookmarkList);
-      } else {
-        toast({ variant: 'destructive', title: '북마크 삭제 실패' });
-      }
-    });
+    mutateDelete(bookmarkId);
   };
-
-  useEffect(() => {
-    axiosInstance.get('/v1/bookmarks').then(response => {
-      if (response.data.success) {
-        setBookmarkList(response.data.data.bookmarks);
-      } else {
-        toast({ variant: 'destructive', title: '북마크 조회 실패' });
-      }
-    });
-  }, [toast]);
 
   return (
     <>
