@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/shadcn/button';
 import { useToast } from '@/shared/lib';
 import { AuthContext } from '@/shared/contexts';
 import { axiosInstance } from '@/shared/api';
-import { BookmarkData } from './types';
+import { BookmarkData } from '@/features/bookmark';
 
 export function Bookmark() {
   const { isLoggedIn } = useContext(AuthContext);

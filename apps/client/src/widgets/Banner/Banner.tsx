@@ -1,5 +1,5 @@
 import { MoveCharacter } from '@/shared/ui';
-import { Bookmark } from './Bookmark';
+import { Bookmark } from '@/features/bookmark';
 
 export function Banner() {
   return (
