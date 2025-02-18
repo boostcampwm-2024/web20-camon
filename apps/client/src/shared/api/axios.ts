@@ -19,3 +19,18 @@ axiosInstance.interceptors.request.use(
   },
   error => Promise.reject(error instanceof Error ? error : new Error(error)),
 );
+
+axiosInstance.interceptors.response.use(
+  response => {
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+    return response;
+  },
+  error => {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error('서버와 통신 중 오류가 발생했습니다.');
+  },
+);
