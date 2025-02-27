@@ -1,2 +1,2 @@
 export { LiveCamperInfo, LivePlayer } from './ui';
-export { useConsume } from './model';
+export { useConsume, useLiveInfo } from './model';

@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/shadcn/avatar';
 import { Badge } from '@/shared/ui/shadcn/badge';
-import { useAPI } from '@/shared/api';
 import {
   LoadingCharacter,
   ErrorCharacter,
@@ -10,12 +9,12 @@ import {
   BlogIcon,
   LinkedInIcon,
 } from '@/shared/ui';
-import { LiveInfo } from './types';
+import { useLiveInfo } from '@/features/watching';
 
 export function LiveCamperInfo({ liveId }: Readonly<{ liveId: string }>) {
-  const { data, isLoading, error } = useAPI<LiveInfo>(`v1/broadcasts/${liveId}/info`);
+  const { data, isLoading, isError } = useLiveInfo(liveId);
 
-  if (error || !data) {
+  if (isError || !data) {
     return (
       <div className="text-text-danger flex justify-center items-center">
         <ErrorCharacter size={120} message="방송 정보 조회에 실패했습니다." />
@@ -79,7 +78,7 @@ export function LiveCamperInfo({ liveId }: Readonly<{ liveId: string }>) {
           <GithubIcon size={24} />
         </IconButton>
 
-        <IconButton disabled={!data.contacts.linkedin} onClick={() => window.open(data.contacts.linkedin, '_blank')}>
+        <IconButton disabled={!data.contacts.linkedIn} onClick={() => window.open(data.contacts.linkedIn, '_blank')}>
           <LinkedInIcon size={24} />
         </IconButton>
       </div>
