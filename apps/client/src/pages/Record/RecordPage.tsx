@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { RecordInfo, RecordList, RecordPlayer } from './ui';
-
-export type RecordData = {
-  recordId: number;
-  title: string;
-  video: string;
-  date: string;
-};
+import { RecordData } from '@/entities/record';
 
 export function RecordPage() {
   const [nowPlaying, setNowPlaying] = useState<RecordData>({ recordId: 0, title: '', video: '', date: '' });
