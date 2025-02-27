@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type IntersectHandler = (entry: IntersectionObserverEntry, observer: IntersectionObserver) => void;
 
@@ -8,11 +8,15 @@ type UseIntersectProps = {
 };
 
 export const useIntersect = ({ onIntersect, options }: UseIntersectProps) => {
+  const [inView, setInView] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const callback = useCallback(
     (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) onIntersect(entry, observer);
+        setInView(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          onIntersect(entry, observer);
+        }
       });
     },
     [onIntersect],
@@ -27,5 +31,5 @@ export const useIntersect = ({ onIntersect, options }: UseIntersectProps) => {
     };
   }, [ref, options, callback]);
 
-  return ref;
+  return { ref, inView };
 };

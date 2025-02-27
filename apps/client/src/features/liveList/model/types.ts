@@ -9,7 +9,9 @@ export type LivePreviewInfo = {
   field: Field;
 };
 
+export type Cursor = string | null;
+
 export type LivePreviewListInfo = {
   broadcasts: LivePreviewInfo[];
-  nextCursor: string | null;
+  nextCursor: Cursor;
 };

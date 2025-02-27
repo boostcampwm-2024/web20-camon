@@ -1,3 +1,5 @@
+import { ButtonHTMLAttributes } from 'react';
+
 type IconButtonProps = Readonly<{
   children: React.ReactNode;
   title?: string;
@@ -5,9 +7,10 @@ type IconButtonProps = Readonly<{
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
-}>;
+}> &
+  ButtonHTMLAttributes<HTMLButtonElement>;
 
-export function IconButton({ children, title, ariaLabel, onClick, disabled, className }: IconButtonProps) {
+export function IconButton({ children, title, ariaLabel, onClick, disabled, className, ...props }: IconButtonProps) {
   return (
     <button
       type="button"
@@ -18,6 +21,7 @@ export function IconButton({ children, title, ariaLabel, onClick, disabled, clas
       disabled={disabled}
       title={title}
       aria-label={ariaLabel}
+      {...props}
     >
       <div className="w-6 h-6">{children}</div>
     </button>

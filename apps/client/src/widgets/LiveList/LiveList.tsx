@@ -1,70 +1,62 @@
-import { useCallback, useEffect, useState } from 'react';
-import { axiosInstance } from '@/shared/api';
-import { FieldFilter } from './FieldFilter';
-import { LiveCard } from './LiveCard';
-import { LivePreviewInfo } from '@/pages/Home/model/homeTypes';
-import { Search } from './Search';
+import { useEffect, useState } from 'react';
+import { FieldFilter, LivePreviewCard, Search, LivePreviewInfo } from '@/features/liveList';
 import { Field } from '@/shared/types/sharedTypes';
-import { useIntersect } from '@/pages/Home/model';
-
-const LIMIT = 12;
+import { useIntersect } from '@/shared/lib';
+import { useLivePreviewList, useSearchLivePreviewList } from '@/features/liveList/model/queries';
 
 export function LiveList() {
-  const [liveList, setLiveList] = useState<LivePreviewInfo[]>([]);
-  const [hasNext, setHasNext] = useState(true);
-  const [cursor, setCursor] = useState<string | null>(null);
   const [field, setField] = useState<Field>('');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [liveList, setLiveList] = useState<LivePreviewInfo[]>([]);
 
-  const getLiveList = useCallback(() => {
-    axiosInstance.get('/v1/broadcasts', { params: { field, cursor, limit: LIMIT } }).then(response => {
-      if (response.data.success) {
-        const { broadcasts, nextCursor } = response.data.data;
-        setLiveList(prev => [...prev, ...broadcasts]);
-        setCursor(nextCursor);
-        if (!nextCursor) setHasNext(false);
-      }
-    });
-  }, [field, cursor]);
+  const { data: infiniteData, fetchNextPage, hasNextPage, isFetching } = useLivePreviewList(field);
 
-  const ref = useIntersect({
+  const { data: searchData } = useSearchLivePreviewList(searchKeyword);
+
+  const { ref } = useIntersect({
     onIntersect: (entry, observer) => {
       observer.unobserve(entry.target);
-      if (hasNext && cursor) getLiveList();
+      if (hasNextPage && !isFetching && !isSearching) {
+        fetchNextPage();
+      }
     },
     options: { threshold: 0.3 },
   });
 
-  const hanldeFilterField = (selectedField: Field) => {
-    axiosInstance
-      .get('/v1/broadcasts', { params: { field: selectedField, cursor: null, limit: LIMIT } })
-      .then(response => {
-        if (response.data.success) {
-          const { broadcasts, nextCursor } = response.data.data;
-          setLiveList(broadcasts);
-          setCursor(nextCursor);
-          setHasNext(!!nextCursor);
-        }
-      });
+  useEffect(() => {
+    if (!isSearching && infiniteData) {
+      const newList = infiniteData.pages.flatMap(page => page.broadcasts);
+      setLiveList(newList);
+    }
+  }, [infiniteData, isSearching]);
+
+  useEffect(() => {
+    if (isSearching && searchData) {
+      setLiveList(searchData);
+    }
+  }, [searchData, isSearching]);
+
+  const handleFilterField = (selectedField: Field) => {
+    setField(selectedField);
+    setIsSearching(false);
+    setSearchKeyword('');
   };
 
   const handleSearch = (keyword: string) => {
+    if (keyword.trim() === '') {
+      setIsSearching(false);
+      setSearchKeyword('');
+    }
+    setSearchKeyword(keyword);
     setField('');
-    setCursor(null);
-    axiosInstance.get('/v1/broadcasts/search', { params: { keyword: keyword.trim() } }).then(response => {
-      if (response.data.success) {
-        setLiveList(response.data.data);
-      }
-    });
+    setIsSearching(true);
   };
-
-  useEffect(() => {
-    getLiveList();
-  }, [getLiveList]);
 
   return (
     <div className="flex flex-col w-full flex-1 p-10 justify-start items-center">
       <div className="h-14 w-full flex justify-between items-center my-5 px-5">
-        <FieldFilter onClickFilterButton={hanldeFilterField} />
+        <FieldFilter onClickFilterButton={handleFilterField} />
         <Search onSearch={handleSearch} />
       </div>
       <div className="flex flex-col w-full h-full items-center">
@@ -74,7 +66,7 @@ export function LiveList() {
               const { broadcastId, broadcastTitle, camperId, profileImage, thumbnail } = data;
               return (
                 <div key={broadcastId} className="flex justify-center">
-                  <LiveCard
+                  <LivePreviewCard
                     liveId={broadcastId}
                     title={broadcastTitle}
                     userId={camperId}

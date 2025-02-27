@@ -8,7 +8,7 @@ type LiveCardProps = Readonly<{
   thumbnailUrl: string;
 }>;
 
-export function LiveCard({ liveId, title, userId, profileUrl, thumbnailUrl }: LiveCardProps) {
+export function LivePreviewCard({ liveId, title, userId, profileUrl, thumbnailUrl }: LiveCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
