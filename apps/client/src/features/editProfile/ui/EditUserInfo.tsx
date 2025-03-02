@@ -1,26 +1,15 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/shadcn/avatar';
-import { UserData } from '@/pages/Profile';
-import { Field } from '@/shared/types/sharedTypes';
+import { UserData, useUserDataMutation } from '@/entities/user';
+import { Field } from '@/shared/types';
 import { Button } from '@/shared/ui/shadcn/button';
-import { axiosInstance } from '@/shared/api';
-import { useToast } from '@/shared/lib';
+import { FormInput, transformFormToApiData } from '../lib';
 
 type EditUserInfoProps = Readonly<{
   userData: UserData | undefined;
   toggleEditing: () => void;
 }>;
-
-export type FormInput = {
-  camperId: string | undefined;
-  name: string | undefined;
-  field: Field | undefined;
-  email: string | undefined;
-  github: string | undefined;
-  blog: string | undefined;
-  linkedIn: string | undefined;
-};
 
 export function EditUserInfo({ userData, toggleEditing }: EditUserInfoProps) {
   const [selectedField, setSelectedField] = useState<Field | undefined>(userData?.field);
@@ -39,34 +28,18 @@ export function EditUserInfo({ userData, toggleEditing }: EditUserInfoProps) {
       linkedIn: userData?.contacts.linkedIn,
     },
   });
-  const { toast } = useToast();
+  const { mutateAsync } = useUserDataMutation(toggleEditing);
 
   const handleSelectField = (field: Field) => {
     setSelectedField(selectedField === field ? '' : field);
   };
 
   const handlePatchUserInfo = (data: FormInput) => {
-    const formData = {
-      name: data.name,
-      camperId: data.camperId,
-      field: selectedField,
-      contacts: {
-        email: data.email ? data.email : '',
-        github: data.github ? data.github : '',
-        blog: data.blog ? data.blog : '',
-        linkedin: data.linkedIn ? data.linkedIn : '',
-      },
-    };
+    const formData = transformFormToApiData(data, selectedField);
 
     if (!formData.field) return;
 
-    axiosInstance.patch('/v1/members/info', formData).then(response => {
-      if (response.data.success) {
-        toggleEditing();
-      } else {
-        toast({ variant: 'destructive', title: '유저 정보 수정 실패' });
-      }
-    });
+    mutateAsync(formData);
   };
 
   return (
