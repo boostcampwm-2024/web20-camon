@@ -1,3 +1,3 @@
 export { Banner } from './Banner';
-export { LiveList } from './LiveList';
+export { LivePreviewList } from './LivePreviewList';
 export { Header } from './Header';

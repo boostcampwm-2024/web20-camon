@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { FieldFilter, LivePreviewCard, Search, LivePreviewInfo } from '@/features/liveList';
-import { Field } from '@/shared/types/sharedTypes';
+import { FieldFilter, LivePreviewCard, Search, LivePreviewInfo } from '@/features/livePreview';
+import { Field } from '@/shared/types';
 import { useIntersect } from '@/shared/lib';
-import { useLivePreviewList, useSearchLivePreviewList } from '@/features/liveList/model/queries';
+import { useLivePreviewList, useSearchLivePreviewList } from '@/features/livePreview/model/queries';
 
-export function LiveList() {
+export function LivePreviewList() {
   const [field, setField] = useState<Field>('');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [isSearching, setIsSearching] = useState(false);
