@@ -1,28 +1,34 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { PlayIcon, ErrorCharacter } from '@/shared/ui';
-import { RecordData } from '../RecordPage';
-import { axiosInstance } from '@/shared/api';
+import { PlayIcon, ErrorCharacter, LoadingCharacter } from '@/shared/ui';
+import { RecordData, useRecordList } from '@/entities/record';
 
 type RecordListProps = Readonly<{
   onClickList: (data: RecordData) => void;
 }>;
 
 export function RecordList({ onClickList }: RecordListProps) {
-  const [recordList, setRecordList] = useState<RecordData[]>([]);
   const { attendanceId } = useParams<{ attendanceId: string }>();
-  const [error, setError] = useState<string>('');
+  const { data: recordList, isLoading, isError } = useRecordList(attendanceId);
 
-  useEffect(() => {
-    axiosInstance.get(`/v1/records/${attendanceId}`).then(response => {
-      if (response.data.success) setRecordList(response.data.data.records);
-      else setError(response.data.message);
-    });
-  }, [attendanceId]);
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center">
+        <LoadingCharacter size={200} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center">
+        <ErrorCharacter size={200} message={`${'녹화 목록 조회 실패'}`} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full border border-border-default rounded p-5 overflow-hidden">
-      {error ? (
+      {isError ? (
         <div>
           <ErrorCharacter size={100} message="녹화 영상 목록 조회에 실패했습니다" />
         </div>

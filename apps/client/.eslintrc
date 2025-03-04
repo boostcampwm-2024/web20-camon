@@ -3,6 +3,7 @@
 
   "parserOptions": {
     "project": ["./tsconfig.json"],
+    "tsconfigRootDir": "./apps/client",
     "ecmaVersion": 12,
     "sourceType": "module",
     "ecmaFeatures": {
@@ -15,15 +16,19 @@
     "es2021": true
   },
 
-  "extends": ["airbnb", "airbnb/hooks", "plugin:@typescript-eslint/recommended", "prettier"],
+  "extends": [
+    "airbnb",
+    "airbnb/hooks",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@tanstack/query/recommended",
+    "prettier"
+  ],
 
   "settings": {
     "react": {
       "version": "detect"
     }
   },
-
-  "plugins": ["prettier"],
 
   "rules": {
     // React 관련 규칙
@@ -58,6 +63,10 @@
 
     // 접근성 관련 규칙
     "jsx-a11y/media-has-caption": "off",
+
+    // tanstack query 관련 규칙
+    "@tanstack/query/exhaustive-deps": "error",
+    "@tanstack/query/stable-query-client": "error",
 
     // 기타 규칙
     "no-param-reassign": [

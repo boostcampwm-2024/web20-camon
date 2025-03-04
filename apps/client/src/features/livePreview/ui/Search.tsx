@@ -27,7 +27,7 @@ export function Search({ onSearch }: SearchProps) {
           className="flex-1 bg-transparent focus-visible:outline-none"
           placeholder="검색할 방송 제목을 입력해주세요"
         />
-        <IconButton>
+        <IconButton type="submit">
           <SearchIcon />
         </IconButton>
       </form>

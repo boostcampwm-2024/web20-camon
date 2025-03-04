@@ -1,54 +1,19 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorCharacter, LoadingCharacter } from '@/shared/ui';
 import { PlayIcon } from '@/shared/ui/Icons';
-import { axiosInstance } from '@/shared/api';
+import { useAttendanceList } from '@/entities/attendance';
 
-type AttendanceData = {
-  attendanceId: number;
-  date: string;
-  startTime: string;
-  endTime: string;
-  isAttendance: boolean;
-};
+const ATTENDANCE_TABLE_HEADER = ['학습일', '시작 시간', '종료 시간', '출석 여부'];
 
 export function Attendance() {
-  const [attendanceList, setAttendanceList] = useState<AttendanceData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showLoading, setShowLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
+  const { attendanceList, error, isLoading } = useAttendanceList();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    axiosInstance
-      .get('/v1/members/attendance')
-      .then(response => {
-        if (response.data.success) {
-          setAttendanceList(response.data.data.attendances);
-        } else {
-          setError(new Error(response.data.message));
-        }
-      })
-      .catch(err => setError(err instanceof Error ? err : new Error(err)))
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [setAttendanceList, setError]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoading(true);
-    }, 250);
-
-    return () => clearTimeout(timer);
-  });
 
   const handlePlayRecord = (attendanceId: number) => {
     navigate(`/record/${attendanceId}`);
   };
 
-  if (showLoading && isLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <LoadingCharacter size={200} />
@@ -68,7 +33,7 @@ export function Attendance() {
     <div className="flex justify-center h-1/2 w-full">
       <div className="flex flex-col h-full w-[80vw] border border-border-bold border-b-transparent rounded-t">
         <div className="flex flex-row justify-around items-center gap-11 bg-surface-alt w-full h-14 rounded-t">
-          {['학습일', '시작 시간', '종료 시간', '출석 여부'].map((data: string) => (
+          {ATTENDANCE_TABLE_HEADER.map((data: string) => (
             <div key={data} className="flex flex-1 justify-center items-center text-display-bold24 text-text-bold">
               {data}
             </div>
